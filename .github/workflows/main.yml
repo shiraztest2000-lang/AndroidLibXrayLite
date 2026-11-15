@@ -91,6 +91,7 @@ jobs:
       if: github.event.inputs.release_tag != '' || github.event_name == 'push' && startsWith(github.ref, 'refs/heads/publish/')
       uses: svenstaro/upload-release-action@v2
       with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
         file: ./libv2ray*r
         tag: ${{ env.RELEASE_TAG }}
         file_glob: true
