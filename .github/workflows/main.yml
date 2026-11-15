@@ -1,10 +1,15 @@
 name: Build
 
+permissions:
+  contents: write
+
 on:
   workflow_dispatch:
     inputs:
       release_tag:
+        description: 'GitHub release tag to publish (for example v.03)'
         required: false
+        default: 'v.03'
         type: string
   pull_request:
     branches:
