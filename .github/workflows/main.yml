@@ -17,6 +17,7 @@ on:
   push:
     branches:
       - main
+      - 'publish/**'
 
 jobs:
   build:
@@ -60,17 +61,32 @@ jobs:
          gomobile bind -v -androidapi 24 -trimpath -ldflags='-s -w -buildid= -checklinkname=0' ./
  
     - name: Upload build artifacts
-      if: github.event.inputs.release_tag == ''
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' && inputs.release_tag == ''
       uses: actions/upload-artifact@v7
       with:
         name: libv2ray
         path: |
           ${{ github.workspace }}/libv2ray*r
 
+    - name: Create release tag
+      if: github.event_name == 'workflow_dispatch' && inputs.release_tag != '' || github.event_name == 'push' && startsWith(github.ref, 'refs/heads/publish/')
+      uses: actions/github-script@v9
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const tag = core.getInput('release_tag') || context.refName.replace(/^publish\\//, '');
+          const ref = `refs/tags/${tag}`;
+          try {
+            await github.rest.git.getRef({ owner: context.repo.owner, repo: context.repo.repo, ref: `tags/${tag}` });
+          } catch (error) {
+            if (error.status !== 404) throw error;
+            await github.rest.git.createRef({ owner: context.repo.owner, repo: context.repo.repo, ref, sha: context.sha });
+          }
+
     - name: Upload AndroidLibXrayLite to release
-      if: github.event.inputs.release_tag != ''
+      if: github.event.inputs.release_tag != '' || github.event_name == 'push' && startsWith(github.ref, 'refs/heads/publish/')
       uses: svenstaro/upload-release-action@v2
       with:
         file: ./libv2ray*r
-        tag: ${{ github.event.inputs.release_tag }}
+        tag: ${{ inputs.release_tag || github.ref_name }}
         file_glob: true
