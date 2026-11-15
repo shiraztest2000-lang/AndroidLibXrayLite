@@ -60,4 +60,4 @@ require (
 	lukechampine.com/blake3 v1.4.1 // indirect
 )
 
-replace github.com/xtls/xray-core => github.com/shiraztest2000-lang/Xray-core v0.0.0-20261115112729-3169e7e1df27
+replace github.com/xtls/xray-core => github.com/shiraztest2000-lang/Xray-core v0.0.0-20261115130934-73e01786f938
